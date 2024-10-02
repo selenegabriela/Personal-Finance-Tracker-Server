@@ -1,10 +1,27 @@
 const User = require('../models/User')
 const jwt = require('jsonwebtoken')
+const validator = require('validator')
 
 const registerUser = async(req,res) => {
     const {name, email, password} = req.body;
 
     try {
+        if(!validator.isEmail(email)){
+            return res.status(400).json({message: 'Invalid email'})
+        }
+
+        if (!validator.isStrongPassword(password, {
+            minLength: 8,
+            minLowercase: 1,
+            minUppercase: 1,
+            minNumbers: 1,
+            minSymbols: 1
+          })) {
+            return res.status(400).json({ 
+              message: 'The password must be at least 8 characters long, including a number, an uppercase letter, a lowercase letter, and a special character.'
+            });
+          }
+
         const userExists = await User.findOne({email})
 
         if(userExists) {
