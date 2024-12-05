@@ -5,6 +5,7 @@ const authRoutes = require('./routes/authRoutes');
 const expenseRoutes = require('./routes/expenseRoutes');
 const incomeRoutes = require('./routes/incomeRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
+const budgetGoalRoutes = require('./routes/budgetGoalRoutes');
 const cors = require('cors')
 
 dotenv.config();
@@ -17,6 +18,7 @@ app.use('/api', authRoutes);
 app.use('/api/expenses', expenseRoutes);
 app.use('/api/incomes', incomeRoutes);
 app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/budgetGoal', budgetGoalRoutes);
 
 //app.use('/api/auth', require('./routes/authRoutes'));
 
