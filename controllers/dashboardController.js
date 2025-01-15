@@ -13,6 +13,18 @@ const getDashboardData = async (req, res) => {
         const castedUserId = new mongoose.Types.ObjectId(userId);
         console.log('Casted User ID:', castedUserId);
 
+        const expensesByCategory = await Expense.aggregate([
+            { $match: { userId: castedUserId }},
+            { $group: { _id: '$category', total: {$sum: '$amount'}}}
+        ])
+
+        const expensesByCategoryObj = expensesByCategory.reduce((acc, expense) => {
+            acc[expense._id] = expense.total;
+            return acc;
+        }, {});
+
+        console.log(expensesByCategoryObj);
+
         const totalExpenses = await Expense.aggregate([
             { $match: { userId: castedUserId } },
             { $group: { _id: null, total: { $sum: '$amount' } } }
@@ -32,6 +44,7 @@ const getDashboardData = async (req, res) => {
             totalIncome: totalIncomeValue,
             totalExpenses: totalExpensesValue,
             totalBudget,
+            expensesByCategory: expensesByCategoryObj,
         });
 
     } catch (error) {
