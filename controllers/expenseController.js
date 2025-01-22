@@ -27,6 +27,17 @@ const getExpenses = async (req,res) => {
     }
 }
 
+const getExpense = async (req,res) => {
+    try {
+        const {id} = req.params
+        const expense = await Expense.findById(id)
+        
+        res.status(201).json(expense)
+    } catch(error) {
+        res.status(500).json({ message: 'Error getting expense' });
+    }
+}
+
 const updateExpenses = async (req,res) => {
     try {
         const {id} = req.params
@@ -50,4 +61,4 @@ const deleteExpenses = async (req,res) => {
     }
 }
 
-module.exports = {addExpense,getExpenses,updateExpenses,deleteExpenses}
+module.exports = {addExpense,getExpenses,getExpense,updateExpenses,deleteExpenses}
