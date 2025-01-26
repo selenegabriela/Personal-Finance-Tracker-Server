@@ -41,8 +41,8 @@ const getExpense = async (req,res) => {
 const updateExpenses = async (req,res) => {
     try {
         const {id} = req.params
-        const {amount, category, name} = req.body
-        const updatedExpense = await Expense.findByIdAndUpdate(id,{amount,category,name}, {new: true})
+        const {amount, category} = req.body
+        const updatedExpense = await Expense.findByIdAndUpdate(id,{amount,category}, {new: true})
         
         res.status(201).json(updatedExpense)
     } catch(error) {

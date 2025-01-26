@@ -19,7 +19,6 @@ const getBudgetGoal = async (req,res) => {
     try {
         const userId = req.user
         const budgetGoals = await BudgetGoal.find({userId})
-        console.log(budgetGoals);
         res.status(201).json(budgetGoals);
     } catch (error) {
         console.log(error);

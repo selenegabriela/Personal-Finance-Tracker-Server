@@ -18,6 +18,10 @@ const BudgetGoalSchema = new mongoose.Schema({
         type: String,
         enum: ['daily', 'weekly', 'monthly', 'yearly'],
         default: 'monthly'
+    },
+    date: {
+        type: Date,
+        default: Date.now
     }
 })
 
