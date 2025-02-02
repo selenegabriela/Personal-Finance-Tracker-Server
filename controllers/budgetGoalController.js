@@ -2,10 +2,10 @@ const BudgetGoal = require('../models/BudgetGoal')
 
 const addBudgetGoal = async (req,res) =>{
     try {
-        const { category, amount, period } = req.body;
+        const { category, amount} = req.body;
         const userId = req.user;
 
-        const newBudgetGoal = new BudgetGoal({ userId, category, amount, period})
+        const newBudgetGoal = new BudgetGoal({ userId, category, amount,})
         await newBudgetGoal.save()
         res.status(201).json(newBudgetGoal);
 
@@ -29,8 +29,8 @@ const getBudgetGoal = async (req,res) => {
 const updateBudgetGoal = async (req,res) => {
     try {
         const {id} = req.params
-        const {category, amount, period} = req.body
-        const updatedBudgetGoal = await BudgetGoal.findByIdAndUpdate(id,{amount,category,period}, {new: true})
+        const {category, amount} = req.body
+        const updatedBudgetGoal = await BudgetGoal.findByIdAndUpdate(id,{amount,category}, {new: true})
         
         res.status(201).json(updatedBudgetGoal)
     } catch(error) {
