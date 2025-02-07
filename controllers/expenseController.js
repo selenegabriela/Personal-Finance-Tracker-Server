@@ -18,10 +18,16 @@ const addExpense = async (req,res) => {
 
 const getExpenses = async (req,res) => {
     try {
+        const { month, year } = req.query;
         const userId = req.user
         const expenses = await Expense.find({userId});
+
+        const filteredExpenses = expenses.filter(expense => {
+            const expenseData = new Date(expense.date)
+            return expenseData.getFullYear().toString() === year && (expenseData.getMonth() + 1).toString() === month
+        })
         
-        res.status(201).json(expenses)
+        res.status(201).json(filteredExpenses)
     } catch(error) {
         res.status(500).json({ message: 'Error fetching expenses' });
     }

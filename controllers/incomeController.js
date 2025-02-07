@@ -17,9 +17,16 @@ const addIncome = async(req,res) => {
 
 const getIncome = async(req,res) => {
     try {
+        const { month, year } = req.query;
         const userId = req.user
         const incomes = await Income.find({userId});
-        res.status(201).json(incomes)
+
+        const filteredIncomes = incomes.filter(income => {
+            const incomeData = new Date(income.date)
+            return incomeData.getFullYear().toString() === year && (incomeData.getMonth() + 1).toString() === month
+        })
+
+        res.status(201).json(filteredIncomes)
     } catch(error) {
         res.status(500).json({ message: 'Error fetching incomes' });
     }
