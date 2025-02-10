@@ -17,9 +17,16 @@ const addBudgetGoal = async (req,res) =>{
 
 const getBudgetGoal = async (req,res) => {
     try {
+        const { month, year } = req.query;
         const userId = req.user
         const budgetGoals = await BudgetGoal.find({userId})
-        res.status(201).json(budgetGoals);
+
+        const filteredBudgetGoals = budgetGoals.filter(budgetGoal => {
+            const budgetGoalData = new Date(budgetGoal.date)
+            return budgetGoalData.getFullYear().toString() === year && (budgetGoalData.getMonth() + 1).toString() === month
+        })
+
+        res.status(201).json(filteredBudgetGoals);
     } catch (error) {
         console.log(error);
         res.status(500).json({ message: error });

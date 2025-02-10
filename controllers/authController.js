@@ -55,11 +55,25 @@ const loginUser = async (req, res) => {
         
         if(user && await user.matchPassword(password)) {
             const token = jwt.sign({id: user._id}, process.env.JWT_SECRET, {expiresIn: '30d'})
+
+            const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
+            const yearJoined = user.date.getFullYear()
+            const monthJoinedNum = user.date.getMonth()
+            const monthJoined = months[monthJoinedNum+1]
+            const currentYear = new Date().getFullYear()
+            const years = []
+
+            for(let i = yearJoined; i <= currentYear; i++){
+                years.push(i)
+            }
             
             res.json({
                 _id: user._id,
                 name: user.name,
                 email: user.email,
+                years,
+                monthJoined,
                 token,
             })
         } else {
