@@ -18,16 +18,15 @@ const getDashboardData = async (req, res) => {
 
         const startDate = new Date(selectedYear, selectedMonth, 1);
         const endDate = new Date(selectedYear, selectedMonth + 1, 0, 23, 59, 59);
-        console.log(startDate,endDate);
-        // 🔹 Obtener budget goals del mes actual
+
         let budgetGoals = await BudgetGoal.find({
             userId: castedUserId,
             date: { $gte: startDate, $lte: endDate }
         });
         
-        // 🔹 Si no hay, replicar los del mes anterior
+
         if (budgetGoals.length === 0 && selectedMonth > 0) {
-            console.log('startDate,endDate');
+
             const prevStartDate = new Date(selectedYear, selectedMonth - 1, 1);
             const prevEndDate = new Date(selectedYear, selectedMonth, 0, 23, 59, 59);
 
@@ -49,7 +48,7 @@ const getDashboardData = async (req, res) => {
             }
         }
 
-        // 🔹 Expenses grouped by category
+
         const expensesByCategory = await Expense.aggregate([
             { $match: { userId: castedUserId, date: { $gte: startDate, $lte: endDate } } },
             { $group: { _id: '$category', total: { $sum: '$amount' } } }
@@ -60,17 +59,58 @@ const getDashboardData = async (req, res) => {
             return acc;
         }, {});
 
-        // 🔹 Total expenses
+
         const totalExpenses = await Expense.aggregate([
             { $match: { userId: castedUserId, date: { $gte: startDate, $lte: endDate } } },
             { $group: { _id: null, total: { $sum: '$amount' } } }
         ]);
 
-        // 🔹 Total income
+
         const totalIncome = await Income.aggregate([
             { $match: { userId: castedUserId, date: { $gte: startDate, $lte: endDate } } },
             { $group: { _id: null, total: { $sum: '$amount' } } }
         ]);
+
+        let incomes = [];
+
+        if (selectedMonth > 0) {
+            const prevStartDate = new Date(selectedYear, selectedMonth - 1, 1);
+            const prevEndDate = new Date(selectedYear, selectedMonth, 0, 23, 59, 59);
+
+            const previousIncomes = await Income.find({
+                userId: castedUserId,
+                date: { $gte: prevStartDate, $lte: prevEndDate },
+                recurring: true
+            });
+
+            if (previousIncomes.length > 0) {
+                const currentStartDate = new Date(selectedYear, selectedMonth, 1);
+                const currentEndDate = new Date(selectedYear, selectedMonth + 1, 0, 23, 59, 59);
+
+                const existingIncomes = await Income.find({
+                    userId: castedUserId,
+                    date: { $gte: currentStartDate, $lte: currentEndDate },
+                    source: { $in: previousIncomes.map(income => income.source) }
+                });
+
+                const existingSources = new Set(existingIncomes.map(income => income.source));
+                const newIncomes = previousIncomes
+                    .filter(income => !existingSources.has(income.source)) // Evitar duplicados
+                    .map(income => ({
+                        userId: income.userId,
+                        category: income.category,
+                        amount: income.amount,
+                        source: income.source,
+                        date: currentStartDate, 
+                        recurring: true
+                    }));
+
+                if (newIncomes.length > 0) {
+                    await Income.insertMany(newIncomes);
+                    incomes = [...incomes, ...newIncomes];
+                }
+            }
+        }
 
         const totalExpensesValue = totalExpenses.length > 0 ? totalExpenses[0].total : 0;
         const totalIncomeValue = totalIncome.length > 0 ? totalIncome[0].total : 0;
